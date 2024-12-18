@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.kotlin)
   alias(libs.plugins.ksp)
   alias(libs.plugins.hilt)
+  id("com.google.gms.google-services")
 }
 
 android {
@@ -41,6 +42,13 @@ android {
 }
 
 dependencies {
+
+  implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+  implementation("com.google.firebase:firebase-analytics")
+  implementation("com.google.firebase:firebase-auth")
+
+
+
   //kotlin
   implementation(platform(libs.kotlin.bom))
 
