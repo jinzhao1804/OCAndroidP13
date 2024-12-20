@@ -1,19 +1,25 @@
 package com.openclassrooms.hexagonal.games.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.messaging.FirebaseMessaging
 import com.openclassrooms.hexagonal.games.screen.Screen
+import com.openclassrooms.hexagonal.games.screen.accountManagement.AccountManagementScreen
 import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
 import com.openclassrooms.hexagonal.games.screen.login.LoginScreen
 import com.openclassrooms.hexagonal.games.screen.password.PasswordRecoveryScreen
 import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
+import com.openclassrooms.hexagonal.games.screen.settings.SettingsViewModel
 import com.openclassrooms.hexagonal.games.screen.signup.SignUpScreen
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,6 +33,16 @@ class MainActivity : ComponentActivity() {
   
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    // Abonnement à un topic de notifications
+    FirebaseMessaging.getInstance().subscribeToTopic("notification")
+      .addOnCompleteListener { task ->
+        var msg = "Subscription successful"
+        if (!task.isSuccessful) {
+          msg = "Subscription failed"
+        }
+        Log.e("FCM", msg)
+      }
     
     setContent {
       val navController = rememberNavController()
@@ -39,6 +55,7 @@ class MainActivity : ComponentActivity() {
   
 }
 
+@SuppressLint("NewApi")
 @Composable
 fun HexagonalGamesNavHost(navHostController: NavHostController) {
   NavHost(
@@ -91,6 +108,10 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
         onSettingsClick = {
           navHostController.navigate(Screen.Settings.route)
         },
+        onDisconnectClick = {
+          navHostController.navigate(Screen.AccountManagement.route)
+
+        },
         onFABClick = {
           navHostController.navigate(Screen.AddPost.route)
         }
@@ -103,8 +124,24 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
       )
     }
     composable(route = Screen.Settings.route) {
+      // Use hiltViewModel to inject SettingsViewModel
+      val viewModel: SettingsViewModel = hiltViewModel()
       SettingsScreen(
+        viewModel = viewModel,
         onBackClick = { navHostController.navigateUp() }
+      )
+
+    }
+    composable(route = Screen.AccountManagement.route) {
+      AccountManagementScreen(
+        onLogout = {
+          navHostController.navigate(Screen.Login.route)
+
+        },
+        onAccountDeleted ={
+          navHostController.navigate(Screen.Login.route)
+
+        }
       )
     }
   }

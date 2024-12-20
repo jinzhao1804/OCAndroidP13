@@ -54,6 +54,7 @@ fun HomefeedScreen(
   viewModel: HomefeedViewModel = hiltViewModel(),
   onPostClick: (Post) -> Unit = {},
   onSettingsClick: () -> Unit = {},
+  onDisconnectClick: () -> Unit = {},
   onFABClick: () -> Unit = {},
 ) {
   var showMenu by rememberSaveable { mutableStateOf(false) }
@@ -83,6 +84,16 @@ fun HomefeedScreen(
               text = {
                 Text(
                   text = stringResource(id = R.string.action_settings)
+                )
+              }
+            )
+            DropdownMenuItem(
+              onClick = {
+                onDisconnectClick()
+              },
+              text = {
+                Text(
+                  text = stringResource(id = R.string.action_disconnect)
                 )
               }
             )

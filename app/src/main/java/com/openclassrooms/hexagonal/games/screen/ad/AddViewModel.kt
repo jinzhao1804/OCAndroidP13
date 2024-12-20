@@ -1,7 +1,12 @@
 package com.openclassrooms.hexagonal.games.screen.ad
 
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
@@ -20,7 +25,14 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddViewModel @Inject constructor(private val postRepository: PostRepository) : ViewModel() {
-  
+
+  // Firestore instance
+  private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+  private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+
+  // FirebaseAuth instance
+  private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
   /**
    * Internal mutable state flow representing the current post being edited.
    */
@@ -71,8 +83,22 @@ class AddViewModel @Inject constructor(private val postRepository: PostRepositor
           title = formEvent.title
         )
       }
+
+      else -> {}
     }
   }
+
+  // Define the contract for launching the photo picker
+  val photoPicker = ActivityResultContracts.GetContent()
+
+  // Callback for the selected image
+  fun onPhotoSelected(uri: Uri?) {
+    if (uri != null) {
+      // Here we set the photo URL in the post
+      _post.value = _post.value.copy(photoUrl = uri.toString())
+    }
+  }
+
   
   /**
    * Attempts to add the current post to the repository after setting the author.
@@ -80,13 +106,99 @@ class AddViewModel @Inject constructor(private val postRepository: PostRepositor
    * TODO: Implement logic to retrieve the current user.
    */
   fun addPost() {
-    //TODO : retrieve the current user
-    postRepository.addPost(
-      _post.value.copy(
-        author = User("1", "Gerry", "Ariella")
+    // Retrieve the current user dynamically from FirebaseAuth
+    val currentUser = auth.currentUser
+
+    if (currentUser != null) {
+      // Create the User object with the current user details from FirebaseAuth
+      val user = User(
+        id = currentUser.uid,
+        firstname = currentUser.displayName ?: "Unknown",
+        lastname = currentUser.email ?: "Unknown"
       )
-    )
+
+      // Create the post object with the current user as the author
+      val postWithAuthor = _post.value.copy(author = user)
+
+      // If there is a photo URL, upload it to Firebase Storage
+      postWithAuthor.photoUrl?.let { photoUriString  ->
+        // Create a reference to the Firebase Storage location
+        val storageRef = storage.reference.child("post_photos/${UUID.randomUUID()}")
+
+        val photoUri: Uri = Uri.parse(photoUriString)
+
+        // Upload the photo to Firebase Storage
+        val uploadTask = storageRef.putFile(photoUri)
+
+        uploadTask.addOnSuccessListener {
+          // Get the download URL for the uploaded image
+          storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+            // Now we have the download URL, update the post with it
+            val updatedPost = postWithAuthor.copy(photoUrl = downloadUrl.toString())
+
+            // Convert the Post object to a Map for Firestore
+            val postMap = mapOf(
+              "id" to updatedPost.id,
+              "title" to updatedPost.title,
+              "description" to updatedPost.description,
+              "photoUrl" to updatedPost.photoUrl,
+              "timestamp" to updatedPost.timestamp,
+              "author" to mapOf(
+                "id" to updatedPost.author?.id,
+                "firstname" to updatedPost.author?.firstname,
+                "lastname" to updatedPost.author?.lastname
+              )
+            )
+
+            // Add the post to Firestore under the "posts" collection
+            firestore.collection("posts")
+              .add(postMap)
+              .addOnSuccessListener {
+                // Successfully added to Firestore
+                println("Post successfully added to Firestore.")
+              }
+              .addOnFailureListener { e ->
+                // Handle failure
+                println("Error adding post to Firestore: ${e.message}")
+              }
+          }
+        }.addOnFailureListener { e ->
+          // Handle failure in uploading image
+          println("Error uploading image to Firebase Storage: ${e.message}")
+        }
+      } ?: run {
+        // If no photo, just add post without a photo URL
+        val postMap = mapOf(
+          "id" to postWithAuthor.id,
+          "title" to postWithAuthor.title,
+          "description" to postWithAuthor.description,
+          "photoUrl" to null,
+          "timestamp" to postWithAuthor.timestamp,
+          "author" to mapOf(
+            "id" to postWithAuthor.author?.id,
+            "firstname" to postWithAuthor.author?.firstname,
+            "lastname" to postWithAuthor.author?.lastname
+          )
+        )
+
+        // Add the post to Firestore
+        firestore.collection("posts")
+          .add(postMap)
+          .addOnSuccessListener {
+            // Successfully added to Firestore
+            println("Post successfully added to Firestore.")
+          }
+          .addOnFailureListener { e ->
+            // Handle failure
+            println("Error adding post to Firestore: ${e.message}")
+          }
+      }
+    } else {
+      // Handle case where user is not authenticated
+      println("No authenticated user found.")
+    }
   }
+
   
   /**
    * Verifies mandatory fields of the post

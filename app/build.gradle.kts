@@ -43,6 +43,26 @@ android {
 
 dependencies {
 
+  //firebase firestore
+
+  // Firebase Firestore SDK
+  implementation ("com.google.firebase:firebase-firestore:25.1.1")
+
+  // FirebaseUI Firestore SDK
+  implementation ("com.firebaseui:firebase-ui-firestore:8.0.0")
+
+  // Firebase Core SDK
+  implementation ("com.google.firebase:firebase-core:21.1.1")
+
+  // Firebase Storage SDK
+  implementation ("com.google.firebase:firebase-storage:21.0.1")
+
+  // FirebaseUI Storage SDK
+  implementation ("com.firebaseui:firebase-ui-storage:8.0.0")
+
+
+  
+  implementation ("com.google.firebase:firebase-messaging:24.1.0")  // Dernière version de FCM
   implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
   implementation("com.google.firebase:firebase-analytics")
   implementation("com.google.firebase:firebase-auth")
@@ -54,6 +74,7 @@ dependencies {
 
   //DI
   implementation(libs.hilt)
+  implementation(libs.firebase.firestore.ktx)
   ksp(libs.hilt.compiler)
   implementation(libs.hilt.navigation.compose)
 

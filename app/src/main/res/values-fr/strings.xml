@@ -1,6 +1,7 @@
 <resources>
   <string name="app_name">Hexagonal Games</string>
   <string name="action_settings">Paramètres</string>
+  <string name="action_disconnect">Deconnecter</string>
   <string name="homefeed_fragment_label">Home</string>
   <string name="add_fragment_label">Ajout d\'une publication</string>
   <string name="by">Par %1$s %2$s</string>
@@ -12,6 +13,7 @@
   <string name="action_save">Sauvegarder</string>
   <string name="contentDescription_go_back">Retour</string>
   <string name="contentDescription_more">Plus</string>
+  <string name="default_notification_channel_id">com.openclassrooms.hexagonal.notifications</string>
   <string name="contentDescription_notification_icon">Notification icon</string>
   <string name="error_title">Titre non valide</string>
 </resources>

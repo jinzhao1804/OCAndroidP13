@@ -1,5 +1,8 @@
 package com.openclassrooms.hexagonal.games.screen.ad
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,13 +22,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +44,18 @@ fun AddScreen(
   onBackClick: () -> Unit,
   onSaveClick: () -> Unit
 ) {
+  val post by viewModel.post.collectAsStateWithLifecycle()
+  val error by viewModel.error.collectAsStateWithLifecycle()
+
+  // Remember the launcher for the photo picker
+  val photoPickerLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.GetContent(),
+    onResult = { uri: Uri? ->
+      // Handle the selected image URI
+      viewModel.onPhotoSelected(uri)
+    }
+  )
+
   Scaffold(
     modifier = modifier,
     topBar = {
@@ -60,9 +76,6 @@ fun AddScreen(
       )
     }
   ) { contentPadding ->
-    val post by viewModel.post.collectAsStateWithLifecycle()
-    val error by viewModel.error.collectAsStateWithLifecycle()
-    
     CreatePost(
       modifier = Modifier.padding(contentPadding),
       error = error,
@@ -73,7 +86,12 @@ fun AddScreen(
       onSaveClicked = {
         viewModel.addPost()
         onSaveClick()
-      }
+      },
+      onPhotoClicked = {
+        // Launch the photo picker when the button is clicked
+        photoPickerLauncher.launch("image/*")
+      },
+      photoUrl = post.photoUrl
     )
   }
 }
@@ -86,10 +104,12 @@ private fun CreatePost(
   description: String,
   onDescriptionChanged: (String) -> Unit,
   onSaveClicked: () -> Unit,
-  error: FormError?
+  error: FormError?,
+  onPhotoClicked: () -> Unit,
+  photoUrl: String?
 ) {
   val scrollState = rememberScrollState()
-  
+
   Column(
     modifier = modifier
       .padding(16.dp)
@@ -110,7 +130,7 @@ private fun CreatePost(
         isError = error is FormError.TitleError,
         onValueChange = { onTitleChanged(it) },
         label = { Text(stringResource(id = R.string.hint_title)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
         singleLine = true
       )
       if (error is FormError.TitleError) {
@@ -119,6 +139,7 @@ private fun CreatePost(
           color = MaterialTheme.colorScheme.error,
         )
       }
+
       OutlinedTextField(
         modifier = Modifier
           .padding(top = 16.dp)
@@ -126,9 +147,26 @@ private fun CreatePost(
         value = description,
         onValueChange = { onDescriptionChanged(it) },
         label = { Text(stringResource(id = R.string.hint_description)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
       )
+
+      // Display the selected photo if available
+      photoUrl?.let {
+        Text(
+          text = "Photo selected: $it",
+          color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+          modifier = Modifier.padding(top = 16.dp)
+        )
+      }
+
+      Button(
+        modifier = Modifier.padding(top = 16.dp),
+        onClick = { onPhotoClicked() }
+      ) {
+        Text("Add Photo")
+      }
     }
+
     Button(
       enabled = error == null,
       onClick = { onSaveClicked() }
@@ -141,34 +179,19 @@ private fun CreatePost(
   }
 }
 
-@PreviewLightDark
-@PreviewScreenSizes
+@Preview
 @Composable
-private fun CreatePostPreview() {
+fun CreatePostPreview() {
   HexagonalGamesTheme {
     CreatePost(
       title = "test",
-      onTitleChanged = { },
+      onTitleChanged = {},
       description = "description",
-      onDescriptionChanged = { },
-      onSaveClicked = { },
-      error = null
-    )
-  }
-}
-
-@PreviewLightDark
-@PreviewScreenSizes
-@Composable
-private fun CreatePostErrorPreview() {
-  HexagonalGamesTheme {
-    CreatePost(
-      title = "test",
-      onTitleChanged = { },
-      description = "description",
-      onDescriptionChanged = { },
-      onSaveClicked = { },
-      error = FormError.TitleError
+      onDescriptionChanged = {},
+      onSaveClicked = {},
+      error = null,
+      onPhotoClicked = {},
+      photoUrl = null
     )
   }
 }
