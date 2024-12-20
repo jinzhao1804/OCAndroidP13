@@ -16,5 +16,7 @@ sealed class Screen(
   data object SignUp : Screen("signup")
   data object Password : Screen("password")
   data object AccountManagement : Screen("disconnect")
+  data object Detail : Screen("detail")
+
 
 }

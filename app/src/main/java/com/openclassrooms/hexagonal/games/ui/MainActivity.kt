@@ -12,10 +12,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.google.firebase.messaging.FirebaseMessaging
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.accountManagement.AccountManagementScreen
 import com.openclassrooms.hexagonal.games.screen.add.AddScreen
+import com.openclassrooms.hexagonal.games.screen.detail.DetailScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
 import com.openclassrooms.hexagonal.games.screen.login.LoginScreen
 import com.openclassrooms.hexagonal.games.screen.password.PasswordRecoveryScreen
@@ -101,10 +103,18 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
 
       )
     }
+    composable(
+      route = "${Screen.Detail.route}/{postId}",
+    ) { backStackEntry ->
+      val postId = backStackEntry.arguments?.getString("postId") ?: ""
+      DetailScreen(postId = postId)
+    }
     composable(route = Screen.Homefeed.route) {
       HomefeedScreen(
         onPostClick = {
           //TODO
+          postId ->
+          navHostController.navigate("${Screen.Detail.route}/${postId}")
         },
         onSettingsClick = {
           navHostController.navigate(Screen.Settings.route)
@@ -148,5 +158,7 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
         }
       )
     }
+
+
   }
 }

@@ -4,6 +4,8 @@ plugins {
   alias(libs.plugins.ksp)
   alias(libs.plugins.hilt)
   id("com.google.gms.google-services")
+  id("kotlin-kapt")
+
 }
 
 android {
@@ -43,6 +45,12 @@ android {
 
 dependencies {
 
+  // glide
+
+  implementation ("com.github.bumptech.glide:glide:4.15.1")
+  kapt ("com.github.bumptech.glide:compiler:4.15.1")
+
+
   //firebase firestore
 
   // Firebase Firestore SDK
@@ -61,7 +69,7 @@ dependencies {
   implementation ("com.firebaseui:firebase-ui-storage:8.0.0")
 
 
-  
+
   implementation ("com.google.firebase:firebase-messaging:24.1.0")  // Dernière version de FCM
   implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
   implementation("com.google.firebase:firebase-analytics")
