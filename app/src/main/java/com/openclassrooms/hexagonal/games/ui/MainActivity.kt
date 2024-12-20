@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -118,9 +119,12 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
       )
     }
     composable(route = Screen.AddPost.route) {
+      val context = LocalContext.current
+
       AddScreen(
         onBackClick = { navHostController.navigateUp() },
-        onSaveClick = { navHostController.navigateUp() }
+        onSaveClick = { navHostController.navigateUp() },
+        context = context
       )
     }
     composable(route = Screen.Settings.route) {

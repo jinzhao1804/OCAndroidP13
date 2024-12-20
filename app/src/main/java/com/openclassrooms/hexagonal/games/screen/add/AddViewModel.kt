@@ -123,54 +123,91 @@ class AddViewModel @Inject constructor(private val postRepository: PostRepositor
             val user = documentSnapshot.toObject(User::class.java)
 
             if (user != null) {
-              // Create a post with the current user's details
+
+              // Create the post object with the current user as the author
               val postWithAuthor = _post.value.copy(author = user)
 
-              // Proceed to save the post, etc.
-              val postMap = mapOf(
-                "id" to postWithAuthor.id,
-                "title" to postWithAuthor.title,
-                "description" to postWithAuthor.description,
-                "photoUrl" to postWithAuthor.photoUrl,
-                "timestamp" to postWithAuthor.timestamp,
-                "author" to mapOf(
-                  "id" to postWithAuthor.author?.id,
-                  "firstname" to postWithAuthor.author?.firstname,
-                  "lastname" to postWithAuthor.author?.lastname
-                )
-              )
+              // If there is a photo URL, upload it to Firebase Storage
+              postWithAuthor.photoUrl?.let { photoUriString ->
+                // Create a reference to the Firebase Storage location
+                val storageRef = storage.reference.child("post_photos/${UUID.randomUUID()}")
 
-              // Save post to Firestore
-              firestore.collection("posts")
-                .add(postMap)
-                .addOnSuccessListener {
-                  // Successfully added to Firestore
-                  println("Post successfully added to Firestore.")
+                val photoUri: Uri = Uri.parse(photoUriString)
+
+                // Upload the photo to Firebase Storage
+                val uploadTask = storageRef.putFile(photoUri)
+
+                uploadTask.addOnSuccessListener {
+                  // Get the download URL for the uploaded image
+                  storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    // Now we have the download URL, update the post with it
+                    val updatedPost = postWithAuthor.copy(photoUrl = downloadUrl.toString())
+
+                    // Convert the Post object to a Map for Firestore
+                    val postMap = mapOf(
+                      "id" to updatedPost.id,
+                      "title" to updatedPost.title,
+                      "description" to updatedPost.description,
+                      "photoUrl" to updatedPost.photoUrl,
+                      "timestamp" to updatedPost.timestamp,
+                      "author" to mapOf(
+                        "id" to updatedPost.author?.id,
+                        "firstname" to updatedPost.author?.firstname,
+                        "lastname" to updatedPost.author?.lastname
+                      )
+                    )
+
+                    // Add the post to Firestore under the "posts" collection
+                    firestore.collection("posts")
+                      .add(postMap)
+                      .addOnSuccessListener {
+                        // Successfully added to Firestore
+                        println("Post successfully added to Firestore.")
+                      }
+                      .addOnFailureListener { e ->
+                        // Handle failure
+                        println("Error adding post to Firestore: ${e.message}")
+                      }
+                  }
+                }.addOnFailureListener { e ->
+                  // Handle failure in uploading image
+                  println("Error uploading image to Firebase Storage: ${e.message}")
                 }
-                .addOnFailureListener { e ->
-                  // Handle failure
-                  println("Error adding post to Firestore: ${e.message}")
-                }
+              } ?: run {
+                // If no photo, just add post without a photo URL
+                val postMap = mapOf(
+                  "id" to postWithAuthor.id,
+                  "title" to postWithAuthor.title,
+                  "description" to postWithAuthor.description,
+                  "photoUrl" to null,
+                  "timestamp" to postWithAuthor.timestamp,
+                  "author" to mapOf(
+                    "id" to postWithAuthor.author?.id,
+                    "firstname" to postWithAuthor.author?.firstname,
+                    "lastname" to postWithAuthor.author?.lastname
+                  )
+                )
+
+                // Add the post to Firestore
+                firestore.collection("posts")
+                  .add(postMap)
+                  .addOnSuccessListener {
+                    // Successfully added to Firestore
+                    println("Post successfully added to Firestore.")
+                  }
+                  .addOnFailureListener { e ->
+                    // Handle failure
+                    println("Error adding post to Firestore: ${e.message}")
+                  }
+              }
             } else {
-              // Handle the case where the user object is null
-              println("User data is not available in Firestore.")
+              // Handle case where user is not authenticated
+              println("No authenticated user found.")
             }
-          } else {
-            // Handle the case where the document doesn't exist
-            println("User document does not exist in Firestore.")
           }
         }
-        .addOnFailureListener { exception ->
-          // Handle any errors that occurred while fetching user data
-          println("Error fetching user data from Firestore: ${exception.message}")
-        }
-    } else {
-      // Handle the case where there is no authenticated user
-      println("No authenticated user found.")
     }
   }
-
-
   
   /**
    * Verifies mandatory fields of the post

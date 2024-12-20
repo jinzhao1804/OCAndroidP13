@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.screen.add
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +34,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
+import android.content.Intent
+import android.os.Build
+import android.provider.MediaStore
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,12 +47,13 @@ fun AddScreen(
   modifier: Modifier = Modifier,
   viewModel: AddViewModel = hiltViewModel(),
   onBackClick: () -> Unit,
-  onSaveClick: () -> Unit
+  onSaveClick: () -> Unit,
+  context: Context  // Add the context parameter to use it for starting an intent
 ) {
   val post by viewModel.post.collectAsStateWithLifecycle()
   val error by viewModel.error.collectAsStateWithLifecycle()
 
-  // Remember the launcher for the photo picker
+  // Remember the launcher for the photo picker (Android 11+ devices)
   val photoPickerLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.GetContent(),
     onResult = { uri: Uri? ->
@@ -53,6 +61,9 @@ fun AddScreen(
       viewModel.onPhotoSelected(uri)
     }
   )
+
+  // Handle older Android versions (below Android 11)
+  val usePhotoPicker = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
   Scaffold(
     modifier = modifier,
@@ -62,9 +73,7 @@ fun AddScreen(
           Text(stringResource(id = R.string.add_fragment_label))
         },
         navigationIcon = {
-          IconButton(onClick = {
-            onBackClick()
-          }) {
+          IconButton(onClick = { onBackClick() }) {
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = stringResource(id = R.string.contentDescription_go_back)
@@ -86,8 +95,16 @@ fun AddScreen(
         onSaveClick()
       },
       onPhotoClicked = {
-        // Launch the photo picker when the button is clicked
-        photoPickerLauncher.launch("image/*")
+        if (usePhotoPicker) {
+          // Launch the new photo picker for Android 11+
+          photoPickerLauncher.launch("image/*")
+        } else {
+          // For older Android versions, use the standard file picker
+          val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+          intent.type = "image/*"
+          val chooserIntent = Intent.createChooser(intent, "Select an Image")
+          context.startActivity(chooserIntent)
+        }
       },
       photoUrl = post.photoUrl
     )
