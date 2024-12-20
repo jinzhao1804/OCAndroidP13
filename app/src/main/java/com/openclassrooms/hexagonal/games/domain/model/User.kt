@@ -7,19 +7,12 @@ import java.io.Serializable
  * their ID, first name, and last name. The class implements Serializable to allow for potential
  * serialization needs.
  */
+
+
 data class User(
-  /**
-   * Unique identifier for the User.
-   */
-  val id: String,
-  
-  /**
-   * User's first name.
-   */
-  val firstname: String,
-  
-  /**
-   * User's last name.
-   */
-  val lastname: String
-) : Serializable
+  val id: String = "",         // Default value for id
+  val firstname: String = "",  // Default value for firstname
+  val lastname: String = ""    // Default value for lastname
+) : Serializable {
+  // No-argument constructor is now automatically provided by Kotlin data class.
+}

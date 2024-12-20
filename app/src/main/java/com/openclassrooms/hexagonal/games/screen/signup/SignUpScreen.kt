@@ -2,22 +2,16 @@ package com.openclassrooms.hexagonal.games.screen.signup
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
-import androidx.compose.ui.semantics.SemanticsProperties.Text
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.openclassrooms.hexagonal.games.domain.model.User
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -28,6 +22,8 @@ fun SignUpScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var firstname by remember { mutableStateOf("") }
+    var lastname by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
     val auth = FirebaseAuth.getInstance()
@@ -39,15 +35,31 @@ fun SignUpScreen(
     ) {
         Text("Create Account", style = MaterialTheme.typography.headlineSmall)
 
+        // First Name Input
+        TextField(
+            value = firstname,
+            onValueChange = { firstname = it },
+            label = { Text("First Name") },
+            modifier = Modifier.fillMaxWidth(),
+            isError = errorMessage.isNotEmpty()
+        )
+
+        // Last Name Input
+        TextField(
+            value = lastname,
+            onValueChange = { lastname = it },
+            label = { Text("Last Name") },
+            modifier = Modifier.fillMaxWidth(),
+            isError = errorMessage.isNotEmpty()
+        )
+
         // Email Input
         TextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Email
-            ),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
             isError = errorMessage.isNotEmpty()
         )
 
@@ -78,14 +90,9 @@ fun SignUpScreen(
         Button(
             onClick = {
                 if (password == confirmPassword) {
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                onSignUpSuccess()
-                            } else {
-                                errorMessage = task.exception?.message ?: "Unknown error"
-                            }
-                        }
+                    signUpUser(email, password, firstname, lastname, onSignUpSuccess, onSignUpFailure = { message ->
+                        errorMessage = message
+                    })
                 } else {
                     errorMessage = "Passwords do not match"
                 }
@@ -100,7 +107,51 @@ fun SignUpScreen(
         TextButton(onClick = { onNavigateToLogin() }) {
             Text("Already have an account? Log in")
         }
-
-
     }
+}
+
+fun signUpUser(
+    email: String,
+    password: String,
+    firstname: String,
+    lastname: String,
+    onSignUpSuccess: () -> Unit,
+    onSignUpFailure: (String) -> Unit
+) {
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+
+    // Create user with email and password
+    auth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Successfully created user, now store additional user data
+                val currentUser = auth.currentUser
+                if (currentUser != null) {
+                    val user = User(
+                        id = currentUser.uid,
+                        firstname = firstname,
+                        lastname = lastname
+                    )
+
+                    // Store the user's information in Firestore
+                    firestore.collection("users")
+                        .document(currentUser.uid)
+                        .set(user)
+                        .addOnSuccessListener {
+                            // Successfully added user data to Firestore
+                            onSignUpSuccess()
+                        }
+                        .addOnFailureListener { exception ->
+                            // Handle failure to save user to Firestore
+                            onSignUpFailure("Error adding user data to Firestore: ${exception.message}")
+                        }
+                } else {
+                    onSignUpFailure("User creation failed: Current user is null")
+                }
+            } else {
+                // Handle sign-up failure
+                onSignUpFailure(task.exception?.message ?: "Unknown error")
+            }
+        }
 }
