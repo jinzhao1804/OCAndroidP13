@@ -105,6 +105,7 @@ class AddViewModel @Inject constructor(private val postRepository: PostRepositor
    *
    * TODO: Implement logic to retrieve the current user.
    */
+
   fun addPost() {
     // Retrieve the current user dynamically from FirebaseAuth
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -208,7 +209,14 @@ class AddViewModel @Inject constructor(private val postRepository: PostRepositor
         }
     }
   }
-  
+
+
+  /*
+  suspend fun addPost(post: Post){
+    postRepository.addPost(post)
+  }
+
+  */
   /**
    * Verifies mandatory fields of the post
    * and returns a corresponding FormError if so.
