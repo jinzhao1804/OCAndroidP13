@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment  // Import for using .align
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -24,6 +25,7 @@ import coil.request.ImageRequest
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.Comment
+
 
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,36 +40,45 @@ fun DetailScreen(postId: String, openCommentScreen: () -> Unit) {
     val post = viewModel.post.collectAsState().value
     val comments = viewModel.comments.collectAsState().value
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Post Details") }
-                )
-            }
-        ) { contentPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(contentPadding)
-                    .padding(16.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Post Details") }
+            )
+        },
+        floatingActionButton = {
+            // Use Box to position the FloatingActionButton
+            Box(
+                modifier = Modifier.fillMaxSize()  // Box to fill the screen size
             ) {
-                // Post Details
-                post?.let { PostDetails(post = it) }
-
-                Log.e("post detail","$post")
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Comment Section
-                CommentSection(comments = comments)
-
                 FloatingActionButton(
                     onClick = { openCommentScreen() },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)  // Align the button to the bottom-right corner
+                        .padding(16.dp)  // Padding around the button
                 ) {
-                    Icon(Icons.Filled.Add, "Floating action button.")
+                    Icon(Icons.Filled.Add, contentDescription = "Add Comment")
                 }
             }
         }
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .padding(contentPadding)
+                .padding(16.dp)
+        ) {
+            // Post Details
+            post?.let { PostDetails(post = it) }
+
+            Log.e("post detail", "$post")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Comment Section
+            CommentSection(comments = comments)
+        }
     }
+}
 
 
 @Composable
