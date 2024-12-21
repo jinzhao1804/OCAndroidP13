@@ -110,8 +110,11 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
       val postId = backStackEntry.arguments?.getString("postId") ?: ""
       DetailScreen(postId = postId, openCommentScreen = {
         navHostController.navigate(Screen.Comment.route)
-
-      })
+      },
+        onBackPress = {
+          navHostController.navigateUp()
+        }
+      )
     }
     composable(route = Screen.Comment.route) { backStackEntry ->
       val postId = backStackEntry.arguments?.getString("postId") ?: ""

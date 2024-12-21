@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,7 +31,7 @@ import com.openclassrooms.hexagonal.games.domain.model.Comment
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(postId: String, openCommentScreen: () -> Unit) {
+fun DetailScreen(postId: String, openCommentScreen: () -> Unit, onBackPress: () -> Unit) {
 
     val viewModel: DetailViewModel = hiltViewModel()
     // Fetch post and comments when the composable is first launched
@@ -43,7 +44,12 @@ fun DetailScreen(postId: String, openCommentScreen: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Post Details") }
+                title = { Text("Post Details") },
+                navigationIcon = {
+                    IconButton(onClick = { onBackPress() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
         },
         floatingActionButton = {
