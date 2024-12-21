@@ -105,20 +105,24 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
       )
     }
     composable(
-      route = "${Screen.Detail.route}/{postId}",
+      route = "${Screen.Detail.route}/{postId}"
     ) { backStackEntry ->
       val postId = backStackEntry.arguments?.getString("postId") ?: ""
       DetailScreen(postId = postId, openCommentScreen = {
-        navHostController.navigate(Screen.Comment.route)
+        navHostController.navigate("${Screen.Comment.route}/$postId")
       },
         onBackPress = {
           navHostController.navigateUp()
         }
       )
     }
-    composable(route = Screen.Comment.route) { backStackEntry ->
+    composable(
+      route = "${Screen.Comment.route}/{postId}"
+    ) { backStackEntry ->
       val postId = backStackEntry.arguments?.getString("postId") ?: ""
-      CommentScreen(postId = postId)
+      CommentScreen(postId = postId, onSaveClicked = {
+        navHostController.navigateUp()
+      })
     }
     composable(route = Screen.Homefeed.route) {
       HomefeedScreen(

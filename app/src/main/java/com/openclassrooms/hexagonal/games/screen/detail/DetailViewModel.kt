@@ -80,6 +80,8 @@ class DetailViewModel : ViewModel() {
                 .get()
                 .await()
 
+            Log.e("getCommentsByPostId", "Snapshot size: ${commentsSnapshot.size()}") // Log the number of documents returned
+
             commentsSnapshot.documents.mapNotNull {
                 it.toObject(Comment::class.java)
             }
