@@ -41,6 +41,7 @@ fun DetailScreen(postId: String, openCommentScreen: () -> Unit, onBackPress: () 
     val post = viewModel.post.collectAsState().value
     val comments = viewModel.comments.collectAsState().value
 
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -172,7 +173,7 @@ fun CommentItem(comment: Comment) {
     ) {
         // Comment Author
         Text(
-            text = "Comment by: ${comment.author}",
+            text = "Comment by: ${comment.author?.firstname} ${comment.author?.lastname}",
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray
         )

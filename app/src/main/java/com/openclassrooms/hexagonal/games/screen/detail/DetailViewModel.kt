@@ -76,7 +76,7 @@ class DetailViewModel : ViewModel() {
         // Fetch comments for the post from Firestore
         return try {
             val commentsSnapshot = firestore.collection("comments")
-                .whereEqualTo("postId", postId) // Assuming you store postId in each comment
+                .whereEqualTo("post.postId", postId)  // Query where postId is nested inside the 'posts' field
                 .get()
                 .await()
 

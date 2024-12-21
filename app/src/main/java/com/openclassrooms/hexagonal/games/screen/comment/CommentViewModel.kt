@@ -58,6 +58,7 @@ class CommentViewModel : ViewModel() {
                             Log.e("addComment", "Creating comment object")
                             // Create a comment with the current user as the author and the associated post
                             val comment = Comment(
+                                timestamp = System.currentTimeMillis(),
                                 commentId = UUID.randomUUID().toString(),
                                 comment = commentText,
                                 author = user,
