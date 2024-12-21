@@ -17,6 +17,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.accountManagement.AccountManagementScreen
 import com.openclassrooms.hexagonal.games.screen.add.AddScreen
+import com.openclassrooms.hexagonal.games.screen.comment.CommentScreen
 import com.openclassrooms.hexagonal.games.screen.detail.DetailScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
 import com.openclassrooms.hexagonal.games.screen.login.LoginScreen
@@ -107,7 +108,14 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
       route = "${Screen.Detail.route}/{postId}",
     ) { backStackEntry ->
       val postId = backStackEntry.arguments?.getString("postId") ?: ""
-      DetailScreen(postId = postId)
+      DetailScreen(postId = postId, openCommentScreen = {
+        navHostController.navigate(Screen.Comment.route)
+
+      })
+    }
+    composable(route = Screen.Comment.route) { backStackEntry ->
+      val postId = backStackEntry.arguments?.getString("postId") ?: ""
+      CommentScreen(postId = postId)
     }
     composable(route = Screen.Homefeed.route) {
       HomefeedScreen(

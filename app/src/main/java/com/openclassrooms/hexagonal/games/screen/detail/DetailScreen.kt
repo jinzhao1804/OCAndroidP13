@@ -1,43 +1,34 @@
 package com.openclassrooms.hexagonal.games.screen.detail
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.util.Log
-import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.Comment
-import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(postId: String) {
+fun DetailScreen(postId: String, openCommentScreen: () -> Unit) {
 
     val viewModel: DetailViewModel = hiltViewModel()
     // Fetch post and comments when the composable is first launched
@@ -68,6 +59,12 @@ fun DetailScreen(postId: String) {
 
                 // Comment Section
                 CommentSection(comments = comments)
+
+                FloatingActionButton(
+                    onClick = { openCommentScreen() },
+                ) {
+                    Icon(Icons.Filled.Add, "Floating action button.")
+                }
             }
         }
     }
@@ -173,12 +170,4 @@ fun CommentItem(comment: Comment) {
     }
 
     Spacer(modifier = Modifier.height(8.dp))
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewDetailScreen() {
-    HexagonalGamesTheme {
-        DetailScreen(postId = "1")
-    }
 }
