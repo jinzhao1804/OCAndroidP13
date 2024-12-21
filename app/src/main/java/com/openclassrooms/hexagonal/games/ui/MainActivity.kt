@@ -108,28 +108,36 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
       route = "${Screen.Detail.route}/{postId}"
     ) { backStackEntry ->
       val postId = backStackEntry.arguments?.getString("postId") ?: ""
-      DetailScreen(postId = postId, openCommentScreen = {
-        navHostController.navigate("${Screen.Comment.route}/$postId")
-      },
+      DetailScreen(
+        postId = postId,
+        openCommentScreen = {
+          // Passing the postId to the CommentScreen
+          navHostController.navigate("${Screen.Comment.route}/$postId")
+        },
         onBackPress = {
           navHostController.navigateUp()
         }
       )
     }
+
+    // Same for the CommentScreen route, needs to match {postId}
     composable(
       route = "${Screen.Comment.route}/{postId}"
     ) { backStackEntry ->
       val postId = backStackEntry.arguments?.getString("postId") ?: ""
-      CommentScreen(postId = postId, onSaveClicked = {
-        navHostController.navigateUp()
-      })
+      CommentScreen(
+        postId = postId,
+        onSaveClicked = {
+          navHostController.navigateUp()
+        }
+      )
     }
+
     composable(route = Screen.Homefeed.route) {
       HomefeedScreen(
-        onPostClick = {
-          //TODO
-          postId ->
-          navHostController.navigate("${Screen.Detail.route}/${postId}")
+        onPostClick = { postId ->
+          // Navigate to DetailScreen with the postId
+          navHostController.navigate("${Screen.Detail.route}/$postId")
         },
         onSettingsClick = {
           navHostController.navigate(Screen.Settings.route)

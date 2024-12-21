@@ -10,7 +10,7 @@ import java.io.Serializable
 
 
 data class User(
-  val id: String = "",         // Default value for id
+  val userId: String = "",         // Default value for id
   val firstname: String = "",  // Default value for firstname
   val lastname: String = ""    // Default value for lastname
 ) : Serializable {

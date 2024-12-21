@@ -129,7 +129,7 @@ fun signUpUser(
                 val currentUser = auth.currentUser
                 if (currentUser != null) {
                     val user = User(
-                        id = currentUser.uid,
+                        userId = currentUser.uid,
                         firstname = firstname,
                         lastname = lastname
                     )

@@ -3,7 +3,7 @@ package com.openclassrooms.hexagonal.games.domain.model
 import java.io.Serializable
 
 data class Post(
-  val id: String = "",             // Default value for id
+  val postId: String = "",             // Default value for id
   val title: String = "",          // Default value for title
   val description: String? = "",   // Default value for description
   val photoUrl: String? = "",      // Default value for photoUrl

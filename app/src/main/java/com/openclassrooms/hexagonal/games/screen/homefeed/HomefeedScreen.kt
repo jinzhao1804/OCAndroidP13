@@ -152,7 +152,7 @@ private fun HomefeedCell(
   ElevatedCard(
     modifier = Modifier.fillMaxWidth(),
     onClick = {
-      onPostClick(post.id)
+      onPostClick(post.postId)
     }) {
     Column(
       modifier = Modifier.padding(8.dp),
@@ -202,13 +202,13 @@ private fun HomefeedCellPreview() {
   HexagonalGamesTheme {
     HomefeedCell(
       post = Post(
-        id = "1",
+        postId = "1",
         title = "title",
         description = "description",
         photoUrl = null,
         timestamp = 1,
         author = User(
-          id = "1",
+          userId = "1",
           firstname = "firstname",
           lastname = "lastname"
         )
@@ -225,13 +225,13 @@ private fun HomefeedCellImagePreview() {
   HexagonalGamesTheme {
     HomefeedCell(
       post = Post(
-        id = "1",
+        postId = "1",
         title = "title",
         description = null,
         photoUrl = "https://picsum.photos/id/85/1080/",
         timestamp = 1,
         author = User(
-          id = "1",
+          userId = "1",
           firstname = "firstname",
           lastname = "lastname"
         )

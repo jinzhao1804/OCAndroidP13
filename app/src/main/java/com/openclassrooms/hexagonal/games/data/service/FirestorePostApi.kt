@@ -96,13 +96,13 @@ class FirestorePostApi @Inject constructor() : PostApi {
 
                             // Convert the Post object to a Map for Firestore
                             val postMap = mapOf(
-                                "id" to updatedPost.id,
+                                "postId" to updatedPost.postId,
                                 "title" to updatedPost.title,
                                 "description" to updatedPost.description,
                                 "photoUrl" to updatedPost.photoUrl,
                                 "timestamp" to updatedPost.timestamp,
                                 "author" to mapOf(
-                                    "id" to updatedPost.author?.id,
+                                    "userId" to updatedPost.author?.userId,
                                     "firstname" to updatedPost.author?.firstname,
                                     "lastname" to updatedPost.author?.lastname
                                 )
@@ -118,13 +118,13 @@ class FirestorePostApi @Inject constructor() : PostApi {
                         } ?: run {
                             // If no photo URL, just add post without a photo URL
                             val postMap = mapOf(
-                                "id" to postWithAuthor.id,
+                                "postId" to postWithAuthor.postId,
                                 "title" to postWithAuthor.title,
                                 "description" to postWithAuthor.description,
                                 "photoUrl" to null,
                                 "timestamp" to postWithAuthor.timestamp,
                                 "author" to mapOf(
-                                    "id" to postWithAuthor.author?.id,
+                                    "userId" to postWithAuthor.author?.userId,
                                     "firstname" to postWithAuthor.author?.firstname,
                                     "lastname" to postWithAuthor.author?.lastname
                                 )

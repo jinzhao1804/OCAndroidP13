@@ -44,7 +44,7 @@ class DetailViewModel : ViewModel() {
         // Fetch post from Firestore
         return try {
             val postSnapshot = firestore.collection("posts")
-                .whereEqualTo("id", postId)  // Query by the field "postId"
+                .whereEqualTo("postId", postId)  // Query by the field "postId"
                 .get()
                 .await()
 
@@ -76,7 +76,7 @@ class DetailViewModel : ViewModel() {
         // Fetch comments for the post from Firestore
         return try {
             val commentsSnapshot = firestore.collection("comments")
-                .whereEqualTo("id", postId) // Assuming you store postId in each comment
+                .whereEqualTo("postId", postId) // Assuming you store postId in each comment
                 .get()
                 .await()
 

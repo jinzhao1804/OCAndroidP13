@@ -10,6 +10,7 @@ import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 class CommentViewModel : ViewModel() {
 
@@ -40,7 +41,7 @@ class CommentViewModel : ViewModel() {
                         Log.e("addComment", "Fetching post data from Firestore")
                         // Fetch the post data from Firestore
                         val postRef = firestore.collection("posts")
-                            .whereEqualTo("id", postId)
+                            .whereEqualTo("postId", postId)
                             .get()
                             .await()
 
@@ -57,6 +58,7 @@ class CommentViewModel : ViewModel() {
                             Log.e("addComment", "Creating comment object")
                             // Create a comment with the current user as the author and the associated post
                             val comment = Comment(
+                                commentId = UUID.randomUUID().toString(),
                                 comment = commentText,
                                 author = user,
                                 post = post  // Associate the comment with the post
