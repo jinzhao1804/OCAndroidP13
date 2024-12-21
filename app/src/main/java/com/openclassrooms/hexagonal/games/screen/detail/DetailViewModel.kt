@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.openclassrooms.hexagonal.games.domain.model.Comment
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,6 +78,7 @@ class DetailViewModel : ViewModel() {
         return try {
             val commentsSnapshot = firestore.collection("comments")
                 .whereEqualTo("post.postId", postId)  // Query where postId is nested inside the 'posts' field
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .await()
 
