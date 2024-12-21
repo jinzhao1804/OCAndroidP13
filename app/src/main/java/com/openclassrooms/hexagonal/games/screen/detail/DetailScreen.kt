@@ -1,6 +1,8 @@
 package com.openclassrooms.hexagonal.games.screen.detail
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.util.Log
 import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -11,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -21,13 +24,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.Comment
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(postId: String) {
@@ -40,8 +47,6 @@ fun DetailScreen(postId: String) {
     val post = viewModel.post.collectAsState().value
     val comments = viewModel.comments.collectAsState().value
 
-    // Only display content if the post is available
-    post?.let {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -55,7 +60,9 @@ fun DetailScreen(postId: String) {
                     .padding(16.dp)
             ) {
                 // Post Details
-                PostDetails(post = it)
+                post?.let { PostDetails(post = it) }
+
+                Log.e("post detail","$post")
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -64,13 +71,13 @@ fun DetailScreen(postId: String) {
             }
         }
     }
-}
+
 
 @Composable
 fun PostDetails(post: Post) {
     // Author (Required)
     Text(
-        text = "Author: ${post.author}",
+        text = "Author: ${post.author?.firstname}  ${post.author?.lastname}",
         style = MaterialTheme.typography.headlineSmall
     )
 
@@ -104,29 +111,23 @@ fun PostDetails(post: Post) {
 
 @Composable
 fun GlideImage(url: String, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val imageView = ImageView(context)
-
-    // Glide request to load image into ImageView
-    Glide.with(context)
-        .load(url)
-        .apply(RequestOptions().centerCrop())  // Optional: Add any request options such as center crop
-        .into(imageView)
-
-    // Convert the loaded image into a Bitmap and display it using Compose
-    val imageBitmap: Bitmap? = imageView.drawable.toBitmap()  // Convert Drawable to Bitmap
-
-    // Check if the image was loaded correctly
-    imageBitmap?.let {
-        Image(
-            painter = BitmapPainter(it.asImageBitmap()), // Convert Bitmap to ImageBitmap
-            contentDescription = "Post Image",
-            modifier = modifier,
-            contentScale = ContentScale.Crop
+    val painter = // Enable smooth transitions when the image loads
+        rememberAsyncImagePainter(ImageRequest.Builder  // Optional: Show a placeholder image
+        // Optional: Show a fallback error image
+            (LocalContext.current).data(data = url).apply(block = fun ImageRequest.Builder.() {
+            crossfade(true)  // Enable smooth transitions when the image loads
+            placeholder(R.drawable.ic_launcher_background)  // Optional: Show a placeholder image
+            error(R.drawable.ic_notifications)  // Optional: Show a fallback error image
+        }).build()
         )
-    }
-}
 
+    Image(
+        painter = painter,
+        contentDescription = "Post Image",
+        modifier = modifier,
+        contentScale = ContentScale.Crop
+    )
+}
 @Composable
 fun CommentSection(comments: List<Comment>) {
     Text(

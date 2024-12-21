@@ -14,5 +14,4 @@ data class User(
   val firstname: String = "",  // Default value for firstname
   val lastname: String = ""    // Default value for lastname
 ) : Serializable {
-  // No-argument constructor is now automatically provided by Kotlin data class.
 }
