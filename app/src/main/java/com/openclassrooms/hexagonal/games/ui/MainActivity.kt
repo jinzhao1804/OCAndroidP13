@@ -129,6 +129,9 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
         postId = postId,
         onSaveClicked = {
           navHostController.navigateUp()
+        },
+        onBackClick = {
+          navHostController.navigateUp()
         }
       )
     }

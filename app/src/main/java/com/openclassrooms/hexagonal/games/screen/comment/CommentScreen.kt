@@ -5,6 +5,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,7 +24,8 @@ import com.openclassrooms.hexagonal.games.screen.add.FormEvent
 @Composable
 fun CommentScreen(
     postId: String,
-    onSaveClicked: () -> Unit
+    onSaveClicked: () -> Unit,
+    onBackClick: ()-> Unit
 ) {
     val viewModel: CommentViewModel = hiltViewModel()
     var commentText by remember { mutableStateOf("") }
@@ -32,7 +35,15 @@ fun CommentScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Comment") }
+                title = { Text("Add Comment") },
+                navigationIcon = {
+                    IconButton(onClick = { onBackClick() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.contentDescription_go_back)
+                        )
+                    }
+                }
             )
         }
     ) { contentPadding ->
