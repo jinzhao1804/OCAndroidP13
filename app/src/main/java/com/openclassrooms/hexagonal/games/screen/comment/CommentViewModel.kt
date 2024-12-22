@@ -1,6 +1,7 @@
 package com.openclassrooms.hexagonal.games.screen.comment
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -8,12 +9,54 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.openclassrooms.hexagonal.games.domain.model.Comment
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
+import com.openclassrooms.hexagonal.games.screen.add.FormError
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
+import androidx.compose.runtime.State
+import com.openclassrooms.hexagonal.games.screen.add.FormEvent
+
 
 class CommentViewModel : ViewModel() {
 
+    private var _comment = MutableStateFlow(
+        Comment(
+            commentId = UUID.randomUUID().toString(),
+            comment = "",
+            timestamp = System.currentTimeMillis(),
+            author = null,
+            post = null
+        )
+    )
+
+    val comment: StateFlow<Comment>
+        get() = _comment
+
+    val error = comment.map {
+        verifyComment()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null,
+    )
+
+    fun onAction(formEvent: FormEvent) {
+        when (formEvent) {
+
+            is FormEvent.ContentChanged -> {
+                _comment.value = _comment.value.copy(
+                    comment = formEvent.content
+                )
+            }
+
+            else -> {}
+        }
+    }
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()  // Firebase Authentication instance
 
@@ -92,4 +135,25 @@ class CommentViewModel : ViewModel() {
             Log.e("addComment", "No user is signed in")
         }
     }
+
+    private fun verifyComment(): FormError? {
+        return if (_comment.value.comment.isEmpty()) {
+            FormError.ContentError
+        } else {
+            null
+        }
+    }
+    private val _error = mutableStateOf<FormError?>(null)
+    val errorForm: State<FormError?> = _error
+    // Validate the comment text
+    fun validateComment(commentText: String) {
+        // Example validation logic
+        if (commentText.isEmpty()) {
+            _error.value = FormError.TitleError
+        } else {
+            _error.value = null // Reset error if text is valid
+        }
+    }
 }
+
+

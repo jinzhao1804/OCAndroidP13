@@ -21,7 +21,8 @@ sealed class FormEvent {
    * @property description The new description of the form.
    */
   data class DescriptionChanged(val description: String) : FormEvent()
-  
+
+  data class ContentChanged(val content: String) : FormEvent()
 }
 
 /**
@@ -37,5 +38,7 @@ sealed class FormError(@StringRes val messageRes: Int) {
    * The actual error message can be retrieved using the provided resource ID (`R.string.error_title`).
    */
   data object TitleError : FormError(R.string.error_title)
+
+  data object ContentError : FormError(R.string.error_content)
   
 }

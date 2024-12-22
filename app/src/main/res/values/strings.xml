@@ -16,4 +16,5 @@
   <string name="contentDescription_notification_icon">Icone de notification</string>
   <string name="error_title">Title not valid</string>
   <string name="default_notification_channel_id">com.openclassrooms.hexagonal.notifications</string>
+  <string name="error_content">content is not valid or should not be empty</string>
 </resources>
