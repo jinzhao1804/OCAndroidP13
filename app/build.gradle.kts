@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-  namespace = "com.openclassrooms.hexagonal.games"
+  namespace = "com.openclassrooms.hexagonal.games2"
   compileSdk = 34
 
   defaultConfig {
-    applicationId = "com.openclassrooms.hexagonal.games"
+    applicationId = "com.openclassrooms.hexagonal.games2"
     minSdk = 24
     targetSdk = 34
     versionCode = 1
@@ -41,9 +41,26 @@ android {
   buildFeatures {
     compose = true
   }
+  testOptions {
+    unitTests.isIncludeAndroidResources = true
+  }
+
 }
 
 dependencies {
+
+  // Testing
+  testImplementation("com.google.dagger:hilt-android-testing:2.50")
+  testImplementation("androidx.arch.core:core-testing:2.2.0")
+  testImplementation("org.mockito:mockito-core:4.2.0")
+  testImplementation ("org.mockito:mockito-inline:4.2.0")
+  testImplementation("org.mockito:mockito-junit-jupiter:3.12.4")
+  testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+  testImplementation("io.mockk:mockk:1.13.3")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
 
   // glide
   implementation("io.coil-kt:coil-compose:2.6.0")
@@ -52,6 +69,9 @@ dependencies {
 
 
   //firebase firestore
+
+  implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
+  implementation("com.google.firebase:firebase-storage-ktx:21.0.1")
 
   // Firebase Firestore SDK
   implementation ("com.google.firebase:firebase-firestore:25.1.1")
@@ -99,9 +119,9 @@ dependencies {
 
   implementation(libs.activity.compose)
   implementation(libs.navigation.compose)
-  
+
   implementation(libs.kotlinx.coroutines.android)
-  
+
   implementation(libs.coil.compose)
   implementation(libs.accompanist.permissions)
 
